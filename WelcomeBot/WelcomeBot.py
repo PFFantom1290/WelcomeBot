@@ -249,20 +249,33 @@ async def process_wallet(message: types.Message, state: FSMContext):
         f"💰 <b>BTC кошелёк:</b> {data['btc_wallet']}\n"
         f"🆔 <b>ID пользователя:</b> {message.from_user.id}"
     )
-
     try:
         await bot.send_message(ADMIN_ID, application_text, parse_mode=ParseMode.HTML)
-        logger.info(f"Application sent to admin from user {message.from_user.id}")
+        logger.info("Application sent to admin from user %s", message.from_user.id)
     except Exception as e:
-        logger.error(f"Error sending application: {e}")
+        logger.error("Error sending application: %s", e)
 
+    # ✅ підтвердження для користувача
     await message.answer(
         "✅ <b>Твоя анкета отправлена на рассмотрение.</b>\n"
         "Скоро с тобой свяжется администратор @Chill_manoff",
         parse_mode=ParseMode.HTML,
         reply_markup=get_main_menu_kb()
     )
+
+    # 📢 посилання на канали
+    links = InlineKeyboardBuilder()
+    links.row(
+        types.InlineKeyboardButton(text="📢 Основной канал", url=MAIN_CHANNEL_LINK),
+        types.InlineKeyboardButton(text="💸 Канал выплат",  url=PAYMENTS_CHANNEL_LINK)
+    )
+    await message.answer(
+        "Чтобы не пропустить новости и выплаты, подпишись на наши каналы:",
+        reply_markup=links.as_markup()
+    )
+
     await state.clear()
+
 
 
 # Menu option handlers чем занимаемся

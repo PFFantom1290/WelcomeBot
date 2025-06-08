@@ -277,6 +277,12 @@ async def show_manuals(message: types.Message):
     builder = InlineKeyboardBuilder()
     builder.row(
         types.InlineKeyboardButton(
+            text="Чем занимаемся",
+            url=WHAT_WE_DO_LINK
+        )
+    )
+    builder.row(
+        types.InlineKeyboardButton(
             text="Настройка Electrum",
             url=ELECTRUM_SETUP_LINK
         )

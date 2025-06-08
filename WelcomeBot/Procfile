@@ -1,1 +1,1 @@
-start: python PaymentsScript.py
+start: python WelcomeBot.py

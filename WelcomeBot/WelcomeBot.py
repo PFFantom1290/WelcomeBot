@@ -27,8 +27,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Important links
-MAIN_CHANNEL_LINK = "https://t.me/CryptoBusinessTeamChannel"
-PAYMENTS_CHANNEL_LINK = "https://t.me/CryptoBusinessPayments"
+MAIN_CHANNEL_LINK = "https://t.me/+NpcxCSbz0VxjMjMy"
+PAYMENTS_CHANNEL_LINK = "https://t.me/+ojyK0KkEw-E4NDRi"
 CHILL_MANOFF_LINK = "https://t.me/Chill_manoff"
 WHAT_WE_DO_LINK = "https://telegra.ph/Nashe-napravlenie-05-22"
 ELECTRUM_SETUP_LINK = "https://telegra.ph/Ustanovka-i-nastrojka-Electrum-05-23"

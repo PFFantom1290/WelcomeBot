@@ -331,77 +331,51 @@ async def show_what_we_do(message: types.Message):
         reply_markup=builder.as_markup()
     )
 
-@dp.message(lambda message: message.text == "🧬 Мои кошельки")
+@dp.message(lambda m: m.text == "🧬 Мои кошельки")
+@require_application
 async def show_my_wallets(message: types.Message):
     user = get_user_data(message.from_user.id)
-
-    if not user['wallets']:
-        # Create inline button to generate wallets
-        builder = InlineKeyboardBuilder()
-        builder.add(types.InlineKeyboardButton(
-            text="🔐 Сгенерировать ключи",
-            callback_data="generate_wallets"
-        ))
-
-        await message.answer(
-            "⚠️ У вас пока нет сгенерированных кошельков.",
-            reply_markup=builder.as_markup()
+    if not user["wallets"]:
+        kb = InlineKeyboardBuilder().add(
+            types.InlineKeyboardButton(text="🔐 Сгенерировать ключи", callback_data="generate_wallets")
         )
+        await message.answer("⚠️ У вас пока нет сгенерированных кошельков.", reply_markup=kb.as_markup())
         return
 
-    wallets_text = "🔑 <b>Ваши кошельки для пополнений</b>\n\n"
-
-    for i, wallet in enumerate(user['wallets'], 1):
-        wallets_text += (
-            f"<b>Связка #{i}</b> (создана {wallet['created']})\n"
-            f"• ETH: <code>{wallet['eth']}</code>\n"
-            f"• TRX: <code>{wallet['trx']}</code>\n\n"
+    text = "🔑 <b>Ваши кошельки для пополнений</b>\n\n"
+    for i, w in enumerate(user["wallets"], start=1):
+        text += (
+            f"<b>Связка #{i}</b> (создана {w['created']})\n"
+            f"• ETH: <code>{w['eth']}</code>\n"
+            f"• TRX: <code>{w['trx']}</code>\n\n"
         )
+    await message.answer(text, parse_mode=ParseMode.HTML)
 
-    wallets_text += (
-        "ℹ️ <i>Ethereum адреса работают для всех EVM-сетей "
-        "(Ethereum, BSC, Polygon, Avalanche, Arbitrum, Optimism)</i>"
-    )
-
-    await message.answer(wallets_text, parse_mode=ParseMode.HTML)
-
-# Wallet generation handler
 @dp.callback_query(lambda c: c.data == "generate_wallets")
+@require_application
 async def generate_keys_callback(callback: types.CallbackQuery):
     user = get_user_data(callback.from_user.id)
-    current_time = time.time()
-
-    # Check if user can generate new wallets
-    if user['last_generation'] and (current_time - user['last_generation']) < 24 * 3600:
-        remaining = 24 * 3600 - (current_time - user['last_generation'])
-        hours = int(remaining // 3600)
-        minutes = int((remaining % 3600) // 60)
-        await callback.message.answer(
-            f"⚠️ Вы уже генерировали ключи сегодня.\n"
-            f"Следующая генерация будет доступна через {hours}ч {minutes}м."
-        )
+    now = time.time()
+    if user["last_generation"] and now - user["last_generation"] < 24*3600:
+        rem = 24*3600 - (now - user["last_generation"])
+        h, m = divmod(rem, 3600)
+        m //= 60
+        await callback.message.answer(f"⚠️ Вы уже генерировали ключи сегодня.\nСледующая генерация будет доступна через {int(h)}ч {int(m)}м.")
         await callback.answer()
         return
 
-    # Generate new wallets
-    user['wallets'] = generate_wallets()
-    user['last_generation'] = current_time
+    user["wallets"]        = generate_wallets()
+    user["last_generation"] = now
 
-    wallets_text = "🎉 <b>Новые кошельки сгенерированы!</b>\n\n"
-
-    for i, wallet in enumerate(user['wallets'], 1):
-        wallets_text += (
+    text = "🎉 <b>Новые кошельки сгенерированы!</b>\n\n"
+    for i, w in enumerate(user["wallets"], start=1):
+        text += (
             f"<b>Связка #{i}</b>\n"
-            f"• ERC20: <code>{wallet['eth']}</code>\n"
-            f"• TRC20: <code>{wallet['trx']}</code>\n\n"
+            f"• ERC20: <code>{w['eth']}</code>\n"
+            f"• TRC20: <code>{w['trx']}</code>\n\n"
         )
-
-    wallets_text += (
-        "‼️ <b>ВАЖНО:</b>\n"
-        "Используйте только эти адреса для получения платежей в нашей команде."
-    )
-
-    await callback.message.answer(wallets_text, parse_mode=ParseMode.HTML)
+    text += "‼️ <b>ВАЖНО:</b>\nИспользуйте только эти адреса для получения платежей в нашей команде."
+    await callback.message.answer(text, parse_mode=ParseMode.HTML)
     await callback.answer()
 
 @dp.message(lambda message: message.text == "📈 Моя статистика")

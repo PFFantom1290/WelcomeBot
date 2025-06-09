@@ -20,22 +20,34 @@ weekly_top = {
     "workers": []   # будет заполняться 10 воркерами
 }
 
+def random_top_teams(n):
+    """Generate a list of n random teams."""
+    teams = []
+    for i in range(n):
+        name = random.choice(["Fenix", "Professor", "Djenga", "Девятый", "Akatsuki", "Medici", "wa3rix"])
+        amount = random.randint(1000, 10000)
+        profits = random.randint(1, 20)
+        teams.append({"name": name, "amount": amount, "profits": profits})
+    # Sort by amount descending
+    teams.sort(key=lambda x: x['amount'], reverse=True)
+    return teams
+
+def random_top_workers(n):
+    """Generate a list of n random workers."""
+    workers = []
+    for i in range(n):
+        name = random.choice(["Наташка", "angerfist", "Хорек", "Шарк", "CARAVEL", "Холодрыга", "Не торт"])
+        amount = random.randint(500, 5000)
+        profits = random.randint(1, 10)
+        workers.append({"name": name, "amount": amount, "profits": profits})
+    # Sort by amount descending
+    workers.sort(key=lambda x: x['amount'], reverse=True)
+    return workers
+
 def update_weekly_lists():
     """Обновляем списки в weekly_top — вызывается по расписанию и при старте."""
-    weekly_top["teams"]   = random_top_teams(7)
+    weekly_top["teams"] = random_top_teams(7)
     weekly_top["workers"] = random_top_workers(10)
-
-# запускаем планировщик
-scheduler = AsyncIOScheduler()
-# каждый ПОНЕДЕЛЬНИК в 10:00 (локальное время сервера)
-scheduler.add_job(
-    update_weekly_lists,
-    CronTrigger(day_of_week="mon", hour=10, minute=0)
-)
-scheduler.start()
-
-# сразу генерируем «топ» для текущей недели
-update_weekly_lists()
 
 # Load environment variables основной канал
 load_dotenv()
@@ -54,7 +66,6 @@ logger = logging.getLogger(__name__)
 # Important links
 MAIN_CHANNEL_LINK = "https://t.me/+NpcxCSbz0VxjMjMy"
 PAYMENTS_CHANNEL_LINK = "https://t.me/+ojyK0KkEw-E4NDRi"
-GROUP_CHAT_LINK       = "https://t.me/+312kMTSk0c03YjUy"
 CHILL_MANOFF_LINK = "https://t.me/Chill_manoff"
 WHAT_WE_DO_LINK = "https://telegra.ph/Nashe-napravlenie-05-22"
 ELECTRUM_SETUP_LINK = "https://telegra.ph/Ustanovka-i-nastrojka-Electrum-05-23"
@@ -69,14 +80,12 @@ dp = Dispatcher(storage=storage)
 # User data storage
 user_data = {}
 
-
 # Define states for application process
 class Application(StatesGroup):
     waiting_for_name = State()
     waiting_for_experience = State()
     waiting_for_hours = State()
     waiting_for_wallet = State()
-
 
 # Define ranks and progression
 RANKS = {
@@ -86,23 +95,6 @@ RANKS = {
     "Элита": 10000,
     "Легенда": 20000
 }
-
-# Sample data for leaderboards
-TEAM_LEADERS = ["Девятый", "wa3rix", "Professor", "Djenga", "Псих", "Fenix", "Akatsuki"]
-
-TOP_TEAMS = [
-    {"name": "Fenix", "amount": 5383, "profits": 11},
-    {"name": "Professor", "amount": 5287, "profits": 8},
-    {"name": "Djenga", "amount": 4460, "profits": 9},
-    {"name": "Девятый", "amount": 3940, "profits": 9},
-]
-
-TOP_WORKERS = [
-    {"name": "Наташка", "amount": 1700, "profits": 3},
-    {"name": "angerfist", "amount": 1601, "profits": 2},
-    {"name": "Хорек", "amount": 1494, "profits": 3},
-]
-
 
 # Helper functions
 def get_user_data(user_id):
@@ -117,7 +109,6 @@ def get_user_data(user_id):
         }
     return user_data[user_id]
 
-
 def generate_wallets():
     """Generate new wallet addresses"""
     wallets = []
@@ -130,7 +121,6 @@ def generate_wallets():
             'created': dt.datetime.now().strftime("%d.%m.%Y")
         })
     return wallets
-
 
 def get_next_rank(current_amount):
     """Determine user's rank and progress"""
@@ -154,7 +144,6 @@ def get_next_rank(current_amount):
 
     return current_rank, next_rank, needed
 
-
 # Create main menu keyboard
 def get_main_menu_kb():
     builder = ReplyKeyboardBuilder()
@@ -163,7 +152,6 @@ def get_main_menu_kb():
     builder.row(
         types.KeyboardButton(text="Мануалы")
     )
-
 
     # Third row
     builder.row(
@@ -189,7 +177,6 @@ def get_main_menu_kb():
     )
 
     return builder.as_markup(resize_keyboard=True)
-
 
 # Command handlers
 @dp.message(Command("start"))
@@ -221,7 +208,6 @@ async def cmd_start(message: types.Message, state: FSMContext):
         reply_markup=builder.as_markup()
     )
 
-
 # Application button handler from start message
 @dp.callback_query(lambda c: c.data == "apply_from_start")
 async def apply_from_start(callback: types.CallbackQuery, state: FSMContext):
@@ -229,13 +215,11 @@ async def apply_from_start(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.answer("1. Укажи свое имя и возраст:")
     await callback.answer()
 
-
 # Application process handlers
 @dp.message(lambda message: message.text == "Подать заявку")
 async def process_application_start(message: types.Message, state: FSMContext):
     await state.set_state(Application.waiting_for_name)
     await message.answer("1. Укажи свое имя и возраст:")
-
 
 @dp.message(Application.waiting_for_name)
 async def process_name(message: types.Message, state: FSMContext):
@@ -243,20 +227,17 @@ async def process_name(message: types.Message, state: FSMContext):
     await state.set_state(Application.waiting_for_experience)
     await message.answer("2. Был ли опыт работы на звонках/чатах? (Если был, подробно опишите)")
 
-
 @dp.message(Application.waiting_for_experience)
 async def process_experience(message: types.Message, state: FSMContext):
     await state.update_data(experience=message.text)
     await state.set_state(Application.waiting_for_hours)
     await message.answer("3. Сколько времени готовы уделять работе?")
 
-
 @dp.message(Application.waiting_for_hours)
 async def process_hours(message: types.Message, state: FSMContext):
     await state.update_data(hours=message.text)
     await state.set_state(Application.waiting_for_wallet)
     await message.answer("4. Адрес кошелька с BTC для работы:")
-
 
 @dp.message(Application.waiting_for_wallet)
 async def process_wallet(message: types.Message, state: FSMContext):
@@ -277,22 +258,18 @@ async def process_wallet(message: types.Message, state: FSMContext):
     except Exception as e:
         logger.error("Error sending application: %s", e)
 
-    # ✅ підтвердження для користувача
+    # Confirmation for user
     await message.answer(
         "✅ <b>Твоя анкета отправлена на рассмотрение.</b>\n",
         parse_mode=ParseMode.HTML,
         reply_markup=get_main_menu_kb()
     )
-    await message.answer(
-        "🔹 Выберите действие в меню:",
-        reply_markup=get_main_menu_kb()
-    )
-
-    # 📢 посилання на канали
+    
+    # Channel links
     links = InlineKeyboardBuilder()
     links.row(
         types.InlineKeyboardButton(text="📢 Основной канал", url=MAIN_CHANNEL_LINK),
-        types.InlineKeyboardButton(text="💸 Канал выплат",  url=PAYMENTS_CHANNEL_LINK)
+        types.InlineKeyboardButton(text="💸 Канал выплат", url=PAYMENTS_CHANNEL_LINK)
     )
     await message.answer(
         "Чтобы не пропустить новости и выплаты, подпишись на наши каналы:",
@@ -301,9 +278,7 @@ async def process_wallet(message: types.Message, state: FSMContext):
 
     await state.clear()
 
-
-
-# Menu option handlers чем занимаемся
+# Menu option handlers
 @dp.message(lambda message: message.text == "Мануалы")
 async def show_manuals(message: types.Message):
     manuals_text = (
@@ -344,7 +319,6 @@ async def show_manuals(message: types.Message):
         reply_markup=builder.as_markup()
     )
 
-
 @dp.message(lambda message: message.text == "Статистика TL")
 async def show_tl_stats(message: types.Message):
     stats_text = (
@@ -354,7 +328,13 @@ async def show_tl_stats(message: types.Message):
     )
     await message.answer(stats_text, parse_mode=ParseMode.HTML)
 
-
+@dp.message(lambda message: message.text == "Чем занимаемся")
+async def show_what_we_do(message: types.Message):
+    builder = InlineKeyboardBuilder()
+    builder.add(types.InlineKeyboardButton(
+        text="📖 Подробнее о направлении",
+        url=WHAT_WE_DO_LINK
+    ))
     work_text = (
         "🔹 <b>Основные направления деятельности</b>\n\n"
         "• Настройка Electrum для безопасных транзакций\n"
@@ -362,13 +342,11 @@ async def show_tl_stats(message: types.Message):
         "• Обучение менеджеров для работы с клиентами\n\n"
         "Для получения подробной информации нажмите кнопку ниже:"
     )
-
     await message.answer(
         work_text,
         parse_mode=ParseMode.HTML,
         reply_markup=builder.as_markup()
     )
-
 
 @dp.message(lambda message: message.text == "🧬 Мои кошельки")
 async def show_my_wallets(message: types.Message):
@@ -403,7 +381,6 @@ async def show_my_wallets(message: types.Message):
     )
 
     await message.answer(wallets_text, parse_mode=ParseMode.HTML)
-
 
 # Wallet generation handler
 @dp.callback_query(lambda c: c.data == "generate_wallets")
@@ -444,7 +421,6 @@ async def generate_keys_callback(callback: types.CallbackQuery):
     await callback.message.answer(wallets_text, parse_mode=ParseMode.HTML)
     await callback.answer()
 
-
 @dp.message(lambda message: message.text == "📈 Моя статистика")
 async def show_my_stats(message: types.Message):
     user = get_user_data(message.from_user.id)
@@ -461,26 +437,38 @@ async def show_my_stats(message: types.Message):
 
     await message.answer(stats_text, parse_mode=ParseMode.HTML)
 
-
-@dp.message(lambda m: m.text == "🔝 Команды")
-@require_application
-async def list_teams(msg: types.Message):
-    top = weekly_top["teams"]
+@dp.message(lambda message: message.text == "🔝 Команды")
+async def list_teams(message: types.Message):
+    teams = [
+        {"name": "Fenix", "amount": 5383, "profits": 11},
+        {"name": "Professor", "amount": 5287, "profits": 8},
+        {"name": "Djenga", "amount": 4460, "profits": 9},
+        {"name": "Девятый", "amount": 3940, "profits": 9},
+        {"name": "Akatsuki", "amount": 3389, "profits": 7},
+        {"name": "Medici", "amount": 3347, "profits": 8},
+        {"name": "wa3rix", "amount": 2606, "profits": 6}
+    ]
+    
     text = "🏆 <b>Топ команд за неделю</b>\n\n"
-    for i, team in enumerate(top, start=1):
-        text += f"{i}. <b>{team['name']}</b> — {team['amount']}$ | профитов: {team['profits']}\n"
-    await msg.answer(text, parse_mode=ParseMode.HTML)
+    for i, team in enumerate(teams, start=1):
+        text += f"{i}. <b>{team['name']}</b> - {team['amount']}$ | профитов: {team['profits']}\n"
+    await message.answer(text, parse_mode=ParseMode.HTML)
 
-@dp.message(lambda m: m.text == "🔝 Топ недели")
-@require_application
-async def top_week(msg: types.Message):
-    top = weekly_top["workers"]
+@dp.message(lambda message: message.text == "🔝 Топ недели")
+async def top_week(message: types.Message):
+    workers = [
+        {"name": "Наташка", "amount": 1700, "profits": 3},
+        {"name": "angerfist", "amount": 1601, "profits": 2},
+        {"name": "Хорек", "amount": 1494, "profits": 3},
+        {"name": "Шарк", "amount": 1493, "profits": 2},
+        {"name": "CARAVEL", "amount": 1285, "profits": 2}
+    ]
+    
     text = "🏆 <b>Топ воркеров недели</b>\n\n"
-    for i, w in enumerate(top, start=1):
-        text += f"{i}. <b>{w['name']}</b> — {w['amount']}$ | профитов: {w['profits']}\n"
+    for i, w in enumerate(workers, start=1):
+        text += f"{i}. <b>{w['name']}</b> - {w['amount']}$ | профитов: {w['profits']}\n"
     text += "\n💸 <b>Канал выплат:</b> " + PAYMENTS_CHANNEL_LINK
-    await msg.answer(text, parse_mode=ParseMode.HTML)
-
+    await message.answer(text, parse_mode=ParseMode.HTML)
 
 @dp.message(lambda message: message.text == "💌 Канал")
 async def show_channel_info(message: types.Message):
@@ -509,10 +497,9 @@ async def show_channel_info(message: types.Message):
         reply_markup=builder.as_markup()
     )
 
-
 @dp.message(lambda message: message.text == "🤝 Инвайт")
 async def generate_invite(message: types.Message):
-    bot_username = (await bot.me()).username
+    bot_username = (await bot.get_me()).username
     ref_code = message.from_user.username or str(message.from_user.id)
     invite_link = f"https://t.me/{bot_username}?start={ref_code}"
 
@@ -534,7 +521,6 @@ async def generate_invite(message: types.Message):
         parse_mode=ParseMode.HTML,
         reply_markup=builder.as_markup()
     )
-
 
 @dp.message(lambda message: message.text == "🏦 Выплаты")
 async def show_payments_info(message: types.Message):
@@ -560,14 +546,36 @@ async def show_payments_info(message: types.Message):
         reply_markup=builder.as_markup()
     )
 
-
 # Main function
 async def main():
     logger.info("Starting bot...")
     await dp.start_polling(bot)
 
-
 if __name__ == "__main__":
     import asyncio
 
+    # Generate initial top lists
+    weekly_top["teams"] = [
+        {"name": "Fenix", "amount": 5383, "profits": 11},
+        {"name": "Professor", "amount": 5287, "profits": 8},
+        {"name": "Djenga", "amount": 4460, "profits": 9},
+        {"name": "Девятый", "amount": 3940, "profits": 9},
+        {"name": "Akatsuki", "amount": 3389, "profits": 7},
+        {"name": "Medici", "amount": 3347, "profits": 8},
+        {"name": "wa3rix", "amount": 2606, "profits": 6}
+    ]
+    
+    weekly_top["workers"] = [
+        {"name": "Наташка", "amount": 1700, "profits": 3},
+        {"name": "angerfist", "amount": 1601, "profits": 2},
+        {"name": "Хорек", "amount": 1494, "profits": 3},
+        {"name": "Шарк", "amount": 1493, "profits": 2},
+        {"name": "CARAVEL", "amount": 1285, "profits": 2},
+        {"name": "Холодрыга", "amount": 1230, "profits": 2},
+        {"name": "Не торт", "amount": 1166, "profits": 3},
+        {"name": "ANTAURI", "amount": 1144, "profits": 2},
+        {"name": "Цветочек", "amount": 1104, "profits": 3},
+        {"name": "ОМНИ", "amount": 1069, "profits": 2}
+    ]
+    
     asyncio.run(main())

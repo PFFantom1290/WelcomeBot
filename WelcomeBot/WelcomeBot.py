@@ -568,19 +568,6 @@ async def show_payments_info(message: types.Message):
         reply_markup=builder.as_markup()
     )
 
-async def main():
-    logger.info("Starting bot...")
-
-    # Start scheduler inside main
-    scheduler = AsyncIOScheduler()
-    scheduler.start()
-
-    await dp.start_polling(bot)
-
-if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
-
 
     # Generate initial top lists
     weekly_top["teams"] = [
@@ -605,8 +592,17 @@ if __name__ == "__main__":
         {"name": "Цветочек", "amount": 1104, "profits": 3},
         {"name": "ОМНИ", "amount": 1069, "profits": 2}
     ]
-    scheduler = AsyncIOScheduler()
-scheduler.start()
 
-    
+async def main():
+    logger.info("Starting bot...")
+
+    # Start scheduler inside main
+    scheduler = AsyncIOScheduler()
+    scheduler.start()
+
+    await dp.start_polling(bot)
+
+if __name__ == "__main__":
+    import asyncio
     asyncio.run(main())
+

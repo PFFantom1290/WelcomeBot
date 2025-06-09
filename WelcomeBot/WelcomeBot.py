@@ -27,7 +27,7 @@ ADMIN_ID  = int(os.getenv('MY_ID'))
 
 MAIN_CHANNEL_LINK     = "https://t.me/+NpcxCSbz0VxjMjMy"
 PAYMENTS_CHANNEL_LINK = "https://t.me/+ojyK0KkEw-E4NDRi"
-GROUP_CHAT_LINK       = "https://t.me/YourGroupChat"  # Замените на свой
+GROUP_CHAT_LINK       = "https://t.me/+312kMTSk0c03YjUy"  # Замените на свой
 CHILL_MANOFF_LINK     = "https://t.me/Chill_manoff"
 WHAT_WE_DO_LINK       = "https://telegra.ph/Nashe-napravlenie-05-22"
 ELECTRUM_SETUP_LINK   = "https://telegra.ph/Ustanovka-i-nastrojka-Electrum-05-23"

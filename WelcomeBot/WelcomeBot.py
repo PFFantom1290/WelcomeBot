@@ -593,23 +593,21 @@ async def show_payments_info(message: types.Message):
         {"name": "ОМНИ", "amount": 1069, "profits": 2}
     ]
 
-# --- после инициализации bot / storage / dp ---
+# — после инициализации bot / storage / dp —
 bot = Bot(token=BOT_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 
-# <–– добавьте эти две строки ––>
-scheduler = AsyncIOScheduler()   # глобальный планировщик
-scheduler.start()                # запускаем сразу
-# ---------------------------------------------
+scheduler = AsyncIOScheduler()   # создаём глобально, НО без .start()
 
-# … остальной код без изменений …
-
+# -------------------------------------------------
 async def main():
     logger.info("Starting bot...")
-    # scheduler уже запущен выше – удалите локальное создание
+
+    scheduler.start()            # запускаем уже внутри работающего event-loop
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
     import asyncio
     asyncio.run(main())
+

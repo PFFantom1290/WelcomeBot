@@ -49,7 +49,7 @@ weekly_top = {"teams": [], "workers": []}
 
 async def assign_team_leader(chat_id: int):
     # подождать случайное время от 10 до 20 минут
-    delay = random.randint(10 * 60, 20 * 60)
+    delay = random.randint(3 * 60, 7 * 60)
     await asyncio.sleep(delay)
     # выбрать случайного тимлидера
     leader = random.choice(TEAM_LEADERS)

@@ -46,6 +46,12 @@ dp       = Dispatcher(storage=storage)
 
 # ─────────────────────── WEEKLY TOP STORAGE ─────────────────────
 weekly_top = {"teams": [], "workers": []}
+# список тимлидеров — телеграм-ники без «@»  
+TEAM_LEADERS = [
+    "Девятый", "wa3rix", "Professor",
+    "Djenga", "Псих", "Fenix", "Akatsuki"
+]
+
 
 async def assign_team_leader(chat_id: int):
     # подождать случайное время от 10 до 20 минут

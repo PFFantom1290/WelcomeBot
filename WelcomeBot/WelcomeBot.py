@@ -346,52 +346,23 @@ async def show_what_we_do(message: types.Message):
         reply_markup=builder.as_markup()
     )
 
-@dp.message(lambda m: m.text == "🧬 Мои кошельки")
-@require_application
+@dp.message(lambda message: message.text == "🧬 Мои кошельки")
 async def show_my_wallets(message: types.Message):
-    user = get_user_data(message.from_user.id)
-    if not user["wallets"]:
-        kb = InlineKeyboardBuilder().add(
-            types.InlineKeyboardButton(text="🔐 Сгенерировать ключи", callback_data="generate_wallets")
-        )
-        await message.answer("⚠️ У вас пока нет сгенерированных кошельков.", reply_markup=kb.as_markup())
-        return
-
-    text = "🔑 <b>Ваши кошельки для пополнений</b>\n\n"
-    for i, w in enumerate(user["wallets"], start=1):
-        text += (
-            f"<b>Связка #{i}</b> (создана {w['created']})\n"
-            f"• ETH: <code>{w['eth']}</code>\n"
-            f"• TRX: <code>{w['trx']}</code>\n\n"
-        )
-    await message.answer(text, parse_mode=ParseMode.HTML)
-
-@dp.callback_query(lambda c: c.data == "generate_wallets")
-@require_application
-async def generate_keys_callback(callback: types.CallbackQuery):
-    user = get_user_data(callback.from_user.id)
-    now = time.time()
-    if user["last_generation"] and now - user["last_generation"] < 24*3600:
-        rem = 24*3600 - (now - user["last_generation"])
-        h, m = divmod(rem, 3600)
-        m //= 60
-        await callback.message.answer(f"⚠️ Вы уже генерировали ключи сегодня.\nСледующая генерация будет доступна через {int(h)}ч {int(m)}м.")
-        await callback.answer()
-        return
-
-    user["wallets"]        = generate_wallets()
-    user["last_generation"] = now
-
-    text = "🎉 <b>Новые кошельки сгенерированы!</b>\n\n"
-    for i, w in enumerate(user["wallets"], start=1):
-        text += (
-            f"<b>Связка #{i}</b>\n"
-            f"• ERC20: <code>{w['eth']}</code>\n"
-            f"• TRC20: <code>{w['trx']}</code>\n\n"
-        )
-    text += "‼️ <b>ВАЖНО:</b>\nИспользуйте только эти адреса для получения платежей в нашей команде."
-    await callback.message.answer(text, parse_mode=ParseMode.HTML)
-    await callback.answer()
+    fixed = (
+        "🎉 Новые кошельки сгенерированы!\n\n"
+        "Связка #1\n"
+        "• ERC20: 0x2c9f4be03523c0bdba9157aa70fabf42a078a11d\n"
+        "• TRC20: T1EQF86EF5WEN6P140CZNOMKFFOST34YA6\n\n"
+        "Связка #2\n"
+        "• ERC20: 0x1b8b6a76738e65889c3df76d6fda4fe7f4bf43d1\n"
+        "• TRC20: TDA31M0YHKEN80IGDSH27CGFDP9O56R7YU\n\n"
+        "Связка #3\n"
+        "• ERC20: 0xd07566515844803fcf246d75250f33955a8284ab\n"
+        "• TRC20: T7ZTSE81Q6O6QERZ4W5JKFTHMXOW4W8Q1D\n\n"
+        "‼️ ВАЖНО:\n"
+        "Используйте только эти адреса для получения платежей в нашей команде."
+    )
+    await message.answer(fixed, parse_mode=ParseMode.HTML)
 
 @dp.message(lambda message: message.text == "📈 Моя статистика")
 async def show_my_stats(message: types.Message):

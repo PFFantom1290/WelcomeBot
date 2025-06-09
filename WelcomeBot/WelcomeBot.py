@@ -47,6 +47,19 @@ dp       = Dispatcher(storage=storage)
 # ─────────────────────── WEEKLY TOP STORAGE ─────────────────────
 weekly_top = {"teams": [], "workers": []}
 
+async def assign_team_leader(chat_id: int):
+    # подождать случайное время от 10 до 20 минут
+    delay = random.randint(10 * 60, 20 * 60)
+    await asyncio.sleep(delay)
+    # выбрать случайного тимлидера
+    leader = random.choice(TEAM_LEADERS)
+    # отправить юзеру уведомление
+    await bot.send_message(
+        chat_id,
+        f"🎉 Вы успешно зачислены в команду! Ваш тимлид - @{leader}!"
+    )
+
+
 def random_top_teams(n):
     """Generate a list of n random teams."""
     teams = []
@@ -258,8 +271,10 @@ async def process_wallet(message: types.Message, state: FSMContext):
         "Чтобы не пропустить новости и выплаты, подпишись на наши каналы:",
         reply_markup=links.as_markup()
     )
-
     await state.clear()
+
+    # запланировать уведомление о назначении
+    asyncio.create_task(assign_team_leader(message.chat.id))
 
 # Menu option handlers
 @dp.message(lambda message: message.text == "Мануалы")

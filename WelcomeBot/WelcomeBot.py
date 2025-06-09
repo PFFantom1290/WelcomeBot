@@ -275,9 +275,9 @@ async def process_wallet(message: types.Message, state: FSMContext):
         logger.error("Error sending application: %s", e)
 
     delay_minutes = random.randint(10, 20)
-scheduler.add_job(auto_confirm, "date",
-                  run_date=dt.datetime.now() + dt.timedelta(minutes=delay_minutes),
-                  kwargs={"user_id": message.from_user.id})
+    scheduler.add_job(auto_confirm, "date",
+                      run_date=dt.datetime.now() + dt.timedelta(minutes=delay_minutes),
+                      kwargs={"user_id": message.from_user.id})
 
 
     # Confirmation for user
@@ -568,13 +568,19 @@ async def show_payments_info(message: types.Message):
         reply_markup=builder.as_markup()
     )
 
-# Main function
 async def main():
     logger.info("Starting bot...")
+
+    # Start scheduler inside main
+    scheduler = AsyncIOScheduler()
+    scheduler.start()
+
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
     import asyncio
+    asyncio.run(main())
+
 
     # Generate initial top lists
     weekly_top["teams"] = [

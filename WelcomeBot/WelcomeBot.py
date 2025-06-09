@@ -13,6 +13,22 @@ from aiogram.enums import ParseMode
 from dotenv import load_dotenv
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+import asyncio
+
+async def auto_confirm(user_id):
+    team_leaders = ["Fenix", "Professor", "Djenga", "Девятый", "Akatsuki", "Medici", "wa3rix"]
+    selected_leader = random.choice(team_leaders)
+
+    confirmation_text = (
+        f"✅ <b>Ваша заявка была подтверждена!</b>\n"
+        f"Ваш тимлид – <b>{selected_leader}</b>.\n\n"
+        f"📢 <a href='{MAIN_CHANNEL_LINK}'>Основной канал</a>\n"
+        f"💸 <a href='{PAYMENTS_CHANNEL_LINK}'>Канал выплат</a>\n"
+        f"👥 <a href='{CHILL_MANOFF_LINK}'>Группа команды</a>"
+    )
+
+    await bot.send_message(user_id, confirmation_text, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
+
 
 # хранилище текущего «топа» на неделю
 weekly_top = {
@@ -257,6 +273,12 @@ async def process_wallet(message: types.Message, state: FSMContext):
         logger.info("Application sent to admin from user %s", message.from_user.id)
     except Exception as e:
         logger.error("Error sending application: %s", e)
+
+    delay_minutes = random.randint(10, 20)
+scheduler.add_job(auto_confirm, "date",
+                  run_date=dt.datetime.now() + dt.timedelta(minutes=delay_minutes),
+                  kwargs={"user_id": message.from_user.id})
+
 
     # Confirmation for user
     await message.answer(
@@ -577,5 +599,8 @@ if __name__ == "__main__":
         {"name": "Цветочек", "amount": 1104, "profits": 3},
         {"name": "ОМНИ", "amount": 1069, "profits": 2}
     ]
+    scheduler = AsyncIOScheduler()
+scheduler.start()
+
     
     asyncio.run(main())

@@ -198,10 +198,6 @@ async def cmd_start(message: types.Message, state: FSMContext):
         parse_mode=ParseMode.HTML,
         reply_markup=btn.as_markup()
     )
-    await message.answer(
-        "🔹 Выберите действие в меню:",
-        reply_markup=get_main_menu_kb()
-    )
 
 @dp.callback_query(lambda c: c.data == "apply_from_start")
 async def apply_from_start(callback: types.CallbackQuery, state: FSMContext):

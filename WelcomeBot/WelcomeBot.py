@@ -96,7 +96,7 @@ def random_top_workers(n):
 
 def update_weekly_lists():
     """Обновляем списки в weekly_top — вызывается при старте и каждую неделю."""
-    weekly_top["teams"]   = random_top_teams(7)
+    weekly_top["teams"]   = random_top_teams(5)
     weekly_top["workers"] = random_top_workers(10)
     logger.info(
         "Weekly lists updated: %d teams, %d workers", 
@@ -483,10 +483,7 @@ async def show_payments_info(message: types.Message):
     payments_text = (
         "💰 <b>Информация о выплатах</b>\n\n"
         "Все профиты публикуются в нашем канале выплат.\n\n"
-        "<b>Статистика за неделю:</b>\n"
-        "• Топ воркеров: /topweek\n"
-        "• Топ команд: /topweekteam\n\n"
-        "Выплаты происходят каждый вечер от тимлида."
+        "Выплаты происходят каждый понедельник от вашего тимлида."
     )
 
     await message.answer(
@@ -505,13 +502,13 @@ if __name__ == "__main__":
 
     # Generate initial top lists
     weekly_top["teams"] = [
-        {"name": "Fenix", "amount": 5383, "profits": 11},
-        {"name": "Professor", "amount": 5287, "profits": 8},
-        {"name": "Djenga", "amount": 4460, "profits": 9},
-        {"name": "Девятый", "amount": 3940, "profits": 9},
-        {"name": "Akatsuki", "amount": 3389, "profits": 7},
-        {"name": "Medici", "amount": 3347, "profits": 8},
-        {"name": "wa3rix", "amount": 2606, "profits": 6}
+        {"name": "Fenix", "amount": 7983, "profits": 13},
+        {"name": "Professor", "amount": 5887, "profits": 8},
+        {"name": "Djenga", "amount": 5460, "profits": 7},
+        {"name": "Девятый", "amount": 3940, "profits": 5},
+        {"name": "Akatsuki", "amount": 3389, "profits": 6},
+        {"name": "Medici", "amount": 3547, "profits": 5},
+        {"name": "wa3rix", "amount": 2806, "profits": 4}
     ]
     
     weekly_top["workers"] = [

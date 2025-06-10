@@ -421,9 +421,9 @@ async def top_week(message: types.Message):
     workers = [
         {"name": "Наташка", "amount": 1700, "profits": 3},
         {"name": "angerfist", "amount": 1601, "profits": 2},
-        {"name": "Хорек", "amount": 1494, "profits": 3},
-        {"name": "Шарк", "amount": 1493, "profits": 2},
-        {"name": "CARAVEL", "amount": 1285, "profits": 2}
+        {"name": "Хорек", "amount": 1490, "profits": 3},
+        {"name": "Шарк", "amount": 1321, "profits": 2},
+        {"name": "CARAVEL", "amount": 860, "profits": 2}
     ]
     
     text = "🏆 <b>Топ воркеров недели</b>\n\n"

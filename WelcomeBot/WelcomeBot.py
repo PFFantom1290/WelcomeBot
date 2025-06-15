@@ -23,16 +23,16 @@ from dotenv import load_dotenv
 # ─────────────────────────── CONFIG ────────────────────────────
 load_dotenv()
 BOT_TOKEN = os.getenv('WELCOME_BOT_TOKEN')
-ADMIN_ID  = int(os.getenv('MY_ID'))
+ADMIN_ID = int(os.getenv('MY_ID'))
 
-MAIN_CHANNEL_LINK     = "https://t.me/+NpcxCSbz0VxjMjMy"
+MAIN_CHANNEL_LINK = "https://t.me/+NpcxCSbz0VxjMjMy"
 PAYMENTS_CHANNEL_LINK = "https://t.me/+ojyK0KkEw-E4NDRi"
-GROUP_CHAT_LINK       = "https://t.me/+312kMTSk0c03YjUy"  # Замените на свой
-CHILL_MANOFF_LINK     = "https://t.me/Chill_manoff"
-WHAT_WE_DO_LINK       = "https://telegra.ph/Nashe-napravlenie-05-22"
-ELECTRUM_SETUP_LINK   = "https://telegra.ph/Ustanovka-i-nastrojka-Electrum-05-23"
-CANCEL_TX_LINK        = "https://telegra.ph/OTMENA-BTC-TRANZAKCII-05-31"
-MANAGER_GUIDE_LINK    = "https://telegra.ph/INSTRUKCIYA-DLYA-MENEDZhERA--PERVICHNAYA-OBRABOTKA-ZAYAVKI-05-24"
+GROUP_CHAT_LINK = "https://t.me/+312kMTSk0c03YjUy"  # Замените на свой
+CHILL_MANOFF_LINK = "https://t.me/Chill_manoff"
+WHAT_WE_DO_LINK = "https://telegra.ph/Nashe-napravlenie-05-22"
+ELECTRUM_SETUP_LINK = "https://telegra.ph/Ustanovka-i-nastrojka-Electrum-05-23"
+CANCEL_TX_LINK = "https://telegra.ph/OTMENA-BTC-TRANZAKCII-05-31"
+MANAGER_GUIDE_LINK = "https://telegra.ph/INSTRUKCIYA-DLYA-MENEDZhERA--PERVICHNAYA-OBRABOTKA-ZAYAVKI-05-24"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -40,9 +40,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-bot      = Bot(BOT_TOKEN)
-storage  = MemoryStorage()
-dp       = Dispatcher(storage=storage)
+bot = Bot(BOT_TOKEN)
+storage = MemoryStorage()
+dp = Dispatcher(storage=storage)
 
 # ─────────────────────── WEEKLY TOP STORAGE ─────────────────────
 weekly_top = {"teams": [], "workers": []}
@@ -78,7 +78,6 @@ async def assign_team_leader(chat_id: int):
     )
 
 
-
 def random_top_teams(n):
     """Generate a list of n random teams."""
     teams = []
@@ -86,7 +85,7 @@ def random_top_teams(n):
         name = random.choice([
             "Fenix", "Professor", "Djenga", "Девятый", "Akatsuki", "Medici", "wa3rix"
         ])
-        amount  = random.randint(1000, 10000)
+        amount = random.randint(1000, 10000)
         profits = random.randint(1, 20)
         teams.append({"name": name, "amount": amount, "profits": profits})
     teams.sort(key=lambda x: x['amount'], reverse=True)
@@ -100,7 +99,7 @@ def random_top_workers(n):
         name = random.choice([
             "Наташка", "angerfist", "Хорек", "Шарк", "CARAVEL", "Холодрыга", "Не торт"
         ])
-        amount  = random.randint(500, 5000)
+        amount = random.randint(500, 5000)
         profits = random.randint(1, 10)
         workers.append({"name": name, "amount": amount, "profits": profits})
     workers.sort(key=lambda x: x['amount'], reverse=True)
@@ -109,11 +108,11 @@ def random_top_workers(n):
 
 def update_weekly_lists():
     """Обновляем списки в weekly_top — вызывается при старте и каждую неделю."""
-    weekly_top["teams"]   = random_top_teams(5)
+    weekly_top["teams"] = random_top_teams(5)
     weekly_top["workers"] = random_top_workers(10)
     logger.info(
-        "Weekly lists updated: %d teams, %d workers", 
-        len(weekly_top["teams"]), len(weekly_top["workers"]) 
+        "Weekly lists updated: %d teams, %d workers",
+        len(weekly_top["teams"]), len(weekly_top["workers"])
     )
 
 
@@ -133,8 +132,10 @@ async def weekly_updater():
         await asyncio.sleep(delay)
         update_weekly_lists()
 
+
 # ─────────────────────────── USER STORAGE ────────────────────────
 user_data = {}
+
 
 def get_user_data(user_id):
     if user_id not in user_data:
@@ -148,6 +149,7 @@ def get_user_data(user_id):
         }
     return user_data[user_id]
 
+
 # ───────────────────────────── RANKS ─────────────────────────────
 RANKS = {
     "Фрешмен": 0,
@@ -157,10 +159,11 @@ RANKS = {
     "Легенда": 20000
 }
 
+
 def get_next_rank(total):
     current = max((r for r in RANKS if total >= RANKS[r]), key=lambda r: RANKS[r])
     keys = list(RANKS)
-    idx  = keys.index(current)
+    idx = keys.index(current)
     if idx < len(keys) - 1:
         nxt = keys[idx + 1]
         need = RANKS[nxt] - total
@@ -168,12 +171,13 @@ def get_next_rank(total):
         nxt, need = "Максимальный", 0
     return current, nxt, need
 
+
 # ───────────────────────── FSM APPLICATION ─────────────────────────
 class Application(StatesGroup):
-    waiting_for_name       = State()
+    waiting_for_name = State()
     waiting_for_experience = State()
-    waiting_for_hours      = State()
-    waiting_for_wallet     = State()
+    waiting_for_hours = State()
+    waiting_for_wallet = State()
 
 
 def require_application(handler):
@@ -184,7 +188,9 @@ def require_application(handler):
             )
             return
         return await handler(message, *args, **kwargs)
+
     return wrapper
+
 
 # ───────────────────────── MAIN MENU ─────────────────────────────
 def get_main_menu_kb():
@@ -204,6 +210,7 @@ def get_main_menu_kb():
         types.KeyboardButton(text="🏦 Выплаты")
     )
     return kb.as_markup(resize_keyboard=True)
+
 
 # ───────────────────────────── HANDLERS ─────────────────────────
 @dp.message(Command("start"))
@@ -231,11 +238,13 @@ async def cmd_start(message: types.Message, state: FSMContext):
         reply_markup=btn.as_markup()
     )
 
+
 @dp.callback_query(lambda c: c.data == "apply_from_start")
 async def apply_from_start(callback: types.CallbackQuery, state: FSMContext):
     await state.set_state(Application.waiting_for_name)
     await callback.message.answer("1. Укажи свое имя и возраст:")
     await callback.answer()
+
 
 @dp.message(Application.waiting_for_name)
 async def process_name(message: types.Message, state: FSMContext):
@@ -243,17 +252,20 @@ async def process_name(message: types.Message, state: FSMContext):
     await state.set_state(Application.waiting_for_experience)
     await message.answer("2. Был ли опыт работы на звонках/чатах? (Если был, подробно опишите)")
 
+
 @dp.message(Application.waiting_for_experience)
 async def process_experience(message: types.Message, state: FSMContext):
     await state.update_data(experience=message.text)
     await state.set_state(Application.waiting_for_hours)
     await message.answer("3. Сколько времени готовы уделять работе?")
 
+
 @dp.message(Application.waiting_for_hours)
 async def process_hours(message: types.Message, state: FSMContext):
     await state.update_data(hours=message.text)
     await state.set_state(Application.waiting_for_wallet)
     await message.answer("4. Адрес кошелька с BTC для работы:")
+
 
 @dp.message(Application.waiting_for_wallet)
 async def process_wallet(message: types.Message, state: FSMContext):
@@ -268,7 +280,25 @@ async def process_wallet(message: types.Message, state: FSMContext):
         f"🆔 <b>ID пользователя:</b> {message.from_user.id}"
     )
     try:
-        await bot.send_message(ADMIN_ID, application_text, parse_mode=ParseMode.HTML)
+        # Создаём inline-клавиатуру с кнопками подтверждения
+        keyboard = InlineKeyboardBuilder()
+        keyboard.row(
+            types.InlineKeyboardButton(
+                text="✅ Принять",
+                callback_data=f"approve_{message.from_user.id}"
+            ),
+            types.InlineKeyboardButton(
+                text="❌ Отклонить",
+                callback_data=f"reject_{message.from_user.id}"
+            )
+        )
+
+        await bot.send_message(
+            ADMIN_ID,
+            application_text,
+            parse_mode=ParseMode.HTML,
+            reply_markup=keyboard.as_markup()
+        )
         logger.info("Application sent to admin from user %s", message.from_user.id)
     except Exception as e:
         logger.error("Error sending application: %s", e)
@@ -279,7 +309,7 @@ async def process_wallet(message: types.Message, state: FSMContext):
         parse_mode=ParseMode.HTML,
         reply_markup=get_main_menu_kb()
     )
-    
+
     # Channel links
     links = InlineKeyboardBuilder()
     links.row(
@@ -294,6 +324,7 @@ async def process_wallet(message: types.Message, state: FSMContext):
 
     # запланировать уведомление о назначении
     asyncio.create_task(assign_team_leader(message.chat.id))
+
 
 # Menu option handlers
 @dp.message(lambda message: message.text == "Мануалы")
@@ -336,6 +367,7 @@ async def show_manuals(message: types.Message):
         reply_markup=builder.as_markup()
     )
 
+
 @dp.message(lambda message: message.text == "Статистика TL")
 async def show_tl_stats(message: types.Message):
     stats_text = (
@@ -344,6 +376,7 @@ async def show_tl_stats(message: types.Message):
         "Чтобы стать тимлидером, проявите активность и обратитесь к @Chill_manoff"
     )
     await message.answer(stats_text, parse_mode=ParseMode.HTML)
+
 
 @dp.message(lambda message: message.text == "Чем занимаемся")
 async def show_what_we_do(message: types.Message):
@@ -365,6 +398,7 @@ async def show_what_we_do(message: types.Message):
         reply_markup=builder.as_markup()
     )
 
+
 @dp.message(lambda message: message.text == "🧬 Мои кошельки")
 async def show_my_wallets(message: types.Message):
     fixed = (
@@ -383,6 +417,7 @@ async def show_my_wallets(message: types.Message):
     )
     await message.answer(fixed, parse_mode=ParseMode.HTML)
 
+
 @dp.message(lambda message: message.text == "📈 Моя статистика")
 async def show_my_stats(message: types.Message):
     user = get_user_data(message.from_user.id)
@@ -399,6 +434,7 @@ async def show_my_stats(message: types.Message):
 
     await message.answer(stats_text, parse_mode=ParseMode.HTML)
 
+
 @dp.message(lambda message: message.text == "🔝 Команды")
 async def list_teams(message: types.Message):
     teams = [
@@ -410,11 +446,12 @@ async def list_teams(message: types.Message):
         {"name": "Medici", "amount": 3347, "profits": 8},
         {"name": "wa3rix", "amount": 2606, "profits": 6}
     ]
-    
+
     text = "🏆 <b>Топ команд за неделю</b>\n\n"
     for i, team in enumerate(teams, start=1):
         text += f"{i}. <b>{team['name']}</b> - {team['amount']}$ | профитов: {team['profits']}\n"
     await message.answer(text, parse_mode=ParseMode.HTML)
+
 
 @dp.message(lambda message: message.text == "🔝 Топ недели")
 async def top_week(message: types.Message):
@@ -425,12 +462,13 @@ async def top_week(message: types.Message):
         {"name": "Шарк", "amount": 1321, "profits": 2},
         {"name": "CARAVEL", "amount": 860, "profits": 2}
     ]
-    
+
     text = "🏆 <b>Топ воркеров недели</b>\n\n"
     for i, w in enumerate(workers, start=1):
         text += f"{i}. <b>{w['name']}</b> - {w['amount']}$ | профитов: {w['profits']}\n"
     text += "\n💸 <b>Канал выплат:</b> " + PAYMENTS_CHANNEL_LINK
     await message.answer(text, parse_mode=ParseMode.HTML)
+
 
 @dp.message(lambda message: message.text == "💌 Канал")
 async def show_channel_info(message: types.Message):
@@ -459,6 +497,7 @@ async def show_channel_info(message: types.Message):
         reply_markup=builder.as_markup()
     )
 
+
 @dp.message(lambda message: message.text == "🤝 Инвайт")
 async def generate_invite(message: types.Message):
     bot_username = (await bot.get_me()).username
@@ -484,6 +523,44 @@ async def generate_invite(message: types.Message):
         reply_markup=builder.as_markup()
     )
 
+@dp.callback_query(lambda c: c.data.startswith("approve_") or c.data.startswith("reject_"))
+async def handle_admin_decision(callback: types.CallbackQuery):
+    user_id = int(callback.data.split("_")[1])
+    action = callback.data.split("_")[0]
+
+    if callback.from_user.id != ADMIN_ID:
+        await callback.answer("У вас нет прав", show_alert=True)
+        return
+
+    if action == "approve":
+        get_user_data(user_id)['application_done'] = True
+
+        kb = InlineKeyboardBuilder()
+        kb.row(
+            types.InlineKeyboardButton(text="🚀 Вступить в группу", url=GROUP_CHAT_LINK)
+        )
+        kb.row(
+            types.InlineKeyboardButton(text="📢 Основной канал", url=MAIN_CHANNEL_LINK),
+            types.InlineKeyboardButton(text="💸 Канал выплат", url=PAYMENTS_CHANNEL_LINK)
+        )
+
+        await bot.send_message(
+            user_id,
+            "🎉 Ваша заявка одобрена! Ниже ссылки для вступления:",
+            reply_markup=kb.as_markup()
+        )
+
+        # ⛔ Убираем клавиатуру у админа
+        await callback.message.edit_reply_markup(reply_markup=None)
+        await callback.answer("✅ Пользователь уведомлён")
+    else:
+        await bot.send_message(
+            user_id,
+            "🚫 Ваша заявка была отклонена администратором."
+        )
+        await callback.message.edit_reply_markup(reply_markup=None)
+        await callback.answer("❌ Заявка отклонена")
+
 @dp.message(lambda message: message.text == "🏦 Выплаты")
 async def show_payments_info(message: types.Message):
     # Create inline button for payments channel
@@ -505,10 +582,12 @@ async def show_payments_info(message: types.Message):
         reply_markup=builder.as_markup()
     )
 
+
 # Main function
 async def main():
     logger.info("Starting bot...")
     await dp.start_polling(bot)
+
 
 if __name__ == "__main__":
     import asyncio
@@ -523,7 +602,7 @@ if __name__ == "__main__":
         {"name": "Medici", "amount": 3547, "profits": 5},
         {"name": "wa3rix", "amount": 2806, "profits": 4}
     ]
-    
+
     weekly_top["workers"] = [
         {"name": "Наташка", "amount": 1700, "profits": 3},
         {"name": "angerfist", "amount": 1601, "profits": 2},
@@ -536,5 +615,5 @@ if __name__ == "__main__":
         {"name": "Цветочек", "amount": 1104, "profits": 3},
         {"name": "ОМНИ", "amount": 1069, "profits": 2}
     ]
-    
+
     asyncio.run(main())

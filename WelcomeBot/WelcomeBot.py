@@ -2,7 +2,7 @@
 TG-бот: доступ к меню только после анкеты
 еженедельный «рандомный» топ в понедельник в 10:00
 без зависимости от apscheduler
-"""
+""" 
 
 import os
 import random
@@ -51,31 +51,6 @@ TEAM_LEADERS = [
     "Девятый", "wa3rix", "Professor",
     "Djenga", "Псих", "Fenix", "Akatsuki"
 ]
-
-
-async def assign_team_leader(chat_id: int):
-    # подождать случайное время от 10 до 20 минут
-    delay = random.randint(3 * 60, 7 * 60)
-    await asyncio.sleep(delay)
-
-    # выбрать случайного тимлидера
-    leader = random.choice(TEAM_LEADERS)
-
-    # собрать клавиатуру с кнопкой перехода в общий чат
-    kb = InlineKeyboardBuilder()
-    kb.add(
-        types.InlineKeyboardButton(
-            text="🚀 Вступить в группу",
-            url=GROUP_CHAT_LINK
-        )
-    )
-
-    # отправить пользователю уведомление
-    await bot.send_message(
-        chat_id,
-        f"🎉 Вы успешно зачислены в команду! Ваш тимлид — {leader}!",
-        reply_markup=kb.as_markup()
-    )
 
 
 def random_top_teams(n):
@@ -322,9 +297,6 @@ async def process_wallet(message: types.Message, state: FSMContext):
     )
     await state.clear()
 
-    # запланировать уведомление о назначении
-    asyncio.create_task(assign_team_leader(message.chat.id))
-
 
 # Menu option handlers
 @dp.message(lambda message: message.text == "Мануалы")
@@ -535,10 +507,16 @@ async def handle_admin_decision(callback: types.CallbackQuery):
     if action == "approve":
         get_user_data(user_id)['application_done'] = True
 
-        kb = InlineKeyboardBuilder()
-        kb.row(
-            types.InlineKeyboardButton(text="🚀 Вступить в группу", url=GROUP_CHAT_LINK)
+        leader = random.choice(TEAM_LEADERS)
+
+        text = (
+            f"🎉 Ваша заявка одобрена!\n"
+            f"Ваш тимлид — @{leader}\n\n"
+            f"Ниже — ссылки для вступления:"
         )
+
+        kb = InlineKeyboardBuilder()
+        kb.row(types.InlineKeyboardButton(text="🚀 Вступить в группу", url=GROUP_CHAT_LINK))
         kb.row(
             types.InlineKeyboardButton(text="📢 Основной канал", url=MAIN_CHANNEL_LINK),
             types.InlineKeyboardButton(text="💸 Канал выплат", url=PAYMENTS_CHANNEL_LINK)
@@ -546,7 +524,7 @@ async def handle_admin_decision(callback: types.CallbackQuery):
 
         await bot.send_message(
             user_id,
-            "🎉 Ваша заявка одобрена! Ниже ссылки для вступления:",
+            text,
             reply_markup=kb.as_markup()
         )
 

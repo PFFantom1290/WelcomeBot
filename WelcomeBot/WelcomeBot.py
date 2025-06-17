@@ -2,7 +2,7 @@
 TG-бот: доступ к меню только после анкеты
 еженедельный «рандомный» топ в понедельник в 10:00
 без зависимости от apscheduler
-""" 
+"""
 
 import os
 import random
@@ -46,7 +46,7 @@ dp = Dispatcher(storage=storage)
 
 # ─────────────────────── WEEKLY TOP STORAGE ─────────────────────
 weekly_top = {"teams": [], "workers": []}
-# список тимлидеров — телеграм-ники без «@»  
+# список тимлидеров — телеграм-ники без «@»
 TEAM_LEADERS = [
     "Девятый", "wa3rix", "Professor",
     "Djenga", "Псих", "Fenix", "Akatsuki"
@@ -111,6 +111,10 @@ async def weekly_updater():
 # ─────────────────────────── USER STORAGE ────────────────────────
 user_data = {}
 
+def log_user_action(message: types.Message, action: str):
+    user = message.from_user
+    username = f"@{user.username}" if user.username else "(без username)"
+    logger.info("User %s %s — %s", user.id, username, action)
 
 def get_user_data(user_id):
     if user_id not in user_data:
@@ -191,6 +195,7 @@ def get_main_menu_kb():
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message, state: FSMContext):
     await state.clear()
+    log_user_action(message, "нажал /start")
     btn = InlineKeyboardBuilder().add(
         types.InlineKeyboardButton(
             text="✅ Подать заявку", callback_data="apply_from_start"
@@ -301,6 +306,7 @@ async def process_wallet(message: types.Message, state: FSMContext):
 # Menu option handlers
 @dp.message(lambda message: message.text == "Мануалы")
 async def show_manuals(message: types.Message):
+    log_user_action(message, "открыл мануалы")
     manuals_text = (
         "📚 <b>Основные мануалы проекта</b>\n\n"
         "Выберите нужный мануал из списка ниже:"
@@ -342,6 +348,7 @@ async def show_manuals(message: types.Message):
 
 @dp.message(lambda message: message.text == "Статистика TL")
 async def show_tl_stats(message: types.Message):
+    log_user_action(message, "открыл статистику тимлидеров")
     stats_text = (
         "📈 <b>Статистика TL</b>\n"
         "Вы не являетесь тимлидером ни одной команды.\n\n"
@@ -350,29 +357,9 @@ async def show_tl_stats(message: types.Message):
     await message.answer(stats_text, parse_mode=ParseMode.HTML)
 
 
-@dp.message(lambda message: message.text == "Чем занимаемся")
-async def show_what_we_do(message: types.Message):
-    builder = InlineKeyboardBuilder()
-    builder.add(types.InlineKeyboardButton(
-        text="📖 Подробнее о направлении",
-        url=WHAT_WE_DO_LINK
-    ))
-    work_text = (
-        "🔹 <b>Основные направления деятельности</b>\n\n"
-        "• Настройка Electrum для безопасных транзакций\n"
-        "• Отмена BTC транзакций с использованием RBF\n"
-        "• Обучение менеджеров для работы с клиентами\n\n"
-        "Для получения подробной информации нажмите кнопку ниже:"
-    )
-    await message.answer(
-        work_text,
-        parse_mode=ParseMode.HTML,
-        reply_markup=builder.as_markup()
-    )
-
-
 @dp.message(lambda message: message.text == "🧬 Мои кошельки")
 async def show_my_wallets(message: types.Message):
+    log_user_action(message, "открыл список кошельков")
     fixed = (
         "🎉 Новые кошельки сгенерированы!\n\n"
         "Связка #1\n"
@@ -392,6 +379,7 @@ async def show_my_wallets(message: types.Message):
 
 @dp.message(lambda message: message.text == "📈 Моя статистика")
 async def show_my_stats(message: types.Message):
+    log_user_action(message, "открыл свою статистику")
     user = get_user_data(message.from_user.id)
     current_rank, next_rank, needed = get_next_rank(user['total_profit'])
 
@@ -409,6 +397,7 @@ async def show_my_stats(message: types.Message):
 
 @dp.message(lambda message: message.text == "🔝 Команды")
 async def list_teams(message: types.Message):
+    log_user_action(message, "открыл список команд")
     teams = [
         {"name": "Fenix", "amount": 5383, "profits": 11},
         {"name": "Professor", "amount": 5287, "profits": 8},
@@ -427,6 +416,7 @@ async def list_teams(message: types.Message):
 
 @dp.message(lambda message: message.text == "🔝 Топ недели")
 async def top_week(message: types.Message):
+    log_user_action(message, "открыл топ недели")
     workers = [
         {"name": "Наташка", "amount": 1700, "profits": 3},
         {"name": "angerfist", "amount": 1601, "profits": 2},
@@ -444,6 +434,7 @@ async def top_week(message: types.Message):
 
 @dp.message(lambda message: message.text == "💌 Канал")
 async def show_channel_info(message: types.Message):
+    log_user_action(message, "открыл список каналов")
     # Create inline buttons for channels
     builder = InlineKeyboardBuilder()
     builder.row(
@@ -472,6 +463,7 @@ async def show_channel_info(message: types.Message):
 
 @dp.message(lambda message: message.text == "🤝 Инвайт")
 async def generate_invite(message: types.Message):
+    log_user_action(message, "открыл инвайт ссылку")
     bot_username = (await bot.get_me()).username
     ref_code = message.from_user.username or str(message.from_user.id)
     invite_link = f"https://t.me/{bot_username}?start={ref_code}"

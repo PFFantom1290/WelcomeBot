@@ -1,7 +1,7 @@
 """
 TG-бот: доступ к меню только после анкеты
 еженедельный «рандомный» топ в понедельник в 10:00
-без зависимости от apscheduler
+без зависимости от apscheduler logger.info("Application sent to admin from user %s", message.from_user.id)
 """
 
 import os
@@ -281,7 +281,8 @@ async def process_wallet(message: types.Message, state: FSMContext):
             parse_mode=ParseMode.HTML,
             reply_markup=keyboard.as_markup()
         )
-        logger.info("Application sent to admin from user %s", message.from_user.id)
+        username = f"@{message.from_user.username}" if message.from_user.username else "(без username)"
+        logger.info("Application sent to admin from user %s %s", message.from_user.id, username)
     except Exception as e:
         logger.error("Error sending application: %s", e)
 

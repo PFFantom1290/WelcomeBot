@@ -258,6 +258,8 @@ async def process_wallet(message: types.Message, state: FSMContext):
         f"⏱ <b>Часы работы:</b> {data['hours']}\n"
         f"💰 <b>BTC кошелёк:</b> {data['btc_wallet']}\n"
         f"🆔 <b>ID пользователя:</b> {message.from_user.id}"
+        f"🔗 <b>Username:</b> @{message.from_user.username if message.from_user.username else 'нет'}\n"
+
     )
     try:
         # Создаём inline-клавиатуру с кнопками подтверждения
